@@ -6,7 +6,7 @@ keywords = ["openocd", "rtt", "monitor", "cli", "terminal"]
 license = "MIT OR Apache-2.0"
 name = "rttmon"
 repository = "https://github.com/matteocarnelos/rttmon"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [dependencies]
