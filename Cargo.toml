@@ -2,7 +2,6 @@
 authors = ["Matteo Carnelos <matteo.carnelos@studenti.unipd.it>"]
 categories = ["embedded", "command-line-utilities"]
 description = "A simple RTT monitor for OpenOCD"
-documentation = "https://docs.rs/rttmon"
 keywords = ["openocd", "rtt", "monitor", "cli", "terminal"]
 license = "MIT OR Apache-2.0"
 name = "rttmon"

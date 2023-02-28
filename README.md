@@ -3,7 +3,6 @@
 > A simple RTT monitor for [OpenOCD](https://openocd.org)
 
 [![crates.io](https://img.shields.io/crates/v/rttmon)](https://crates.io/crates/rttmon)
-[![docs.rs](https://img.shields.io/docsrs/rttmon)](https://docs.rs/rttmon)
 [![github](https://img.shields.io/github/actions/workflow/status/matteocarnelos/rttmon/cargo.yml?branch=main)](https://github.com/matteocarnelos/rttmon/actions/workflows/cargo.yml)
 
 ## Features

@@ -1,5 +1,3 @@
-#![doc = include_str!("../README.md")]
-
 use std::io::{BufRead, BufReader, ErrorKind};
 use std::net::TcpStream;
 use std::process::exit;
