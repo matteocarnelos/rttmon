@@ -42,7 +42,7 @@ fn main() {
                     }
                     continue;
                 } else {
-                    eprintln!("{}: {}", "error".red(), e);
+                    eprintln!("{}: {}", "error".bright_red().bold(), e);
                     exit(1);
                 }
             }
