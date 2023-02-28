@@ -1,0 +1,16 @@
+[package]
+authors = ["Matteo Carnelos <matteo.carnelos@studenti.unipd.it>"]
+categories = ["embedded", "command-line-utilities"]
+description = "A simple RTT monitor for OpenOCD"
+documentation = "https://docs.rs/rttmon"
+keywords = ["openocd", "rtt", "monitor", "cli", "terminal"]
+license = "MIT OR Apache-2.0"
+name = "rttmon"
+repository = "https://github.com/matteocarnelos/rttmon"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.1", features = ["derive"] }
+chrono = "0.4"
+colored = "2.0"

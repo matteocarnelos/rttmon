@@ -1,0 +1,79 @@
+#![doc = include_str!("../README.md")]
+
+use std::io::{BufRead, BufReader, ErrorKind};
+use std::net::TcpStream;
+use std::process::exit;
+use std::thread::sleep;
+use std::time::Duration;
+
+use chrono::Local;
+use clap::Parser;
+use colored::Colorize;
+
+/// A simple RTT monitor for OpenOCD
+#[derive(Parser, Debug)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// The OpenOCD RTT server host
+    #[arg(default_value = "localhost")]
+    host: String,
+
+    /// The OpenOCD RTT server port
+    #[arg(default_value_t = 9090)]
+    port: u16,
+}
+
+fn main() {
+    let args = Args::parse();
+    let address = format!("{}:{}", args.host, args.port);
+    let mut waiting = false;
+    loop {
+        sleep(Duration::from_secs(1));
+        let stream = TcpStream::connect(&address);
+        let stream = match stream {
+            Ok(s) => s,
+            Err(e) => {
+                if e.kind() == ErrorKind::ConnectionRefused {
+                    if !waiting {
+                        println!(
+                            "{}",
+                            format!("Waiting connection on {}...", &address.bright_blue())
+                                .bright_black()
+                        );
+                        waiting = true;
+                    }
+                    continue;
+                } else {
+                    eprintln!("{}: {}", "error".red(), e);
+                    exit(1);
+                }
+            }
+        };
+        println!(
+            "{:─^80}",
+            format!(" {} ", "Connection Established".green()).bright_black()
+        );
+        waiting = false;
+        let mut reader = BufReader::new(stream);
+        loop {
+            let mut line = String::new();
+            match reader.read_line(&mut line) {
+                Ok(c) => {
+                    if c == 0 {
+                        break;
+                    }
+                    let now = Local::now().format("%T%.3f");
+                    print!("{} {}", format!("[{}]", now).bright_black(), line);
+                }
+                Err(_) => {
+                    break;
+                }
+            }
+        }
+        println!(
+            "{:─^80}",
+            format!(" {} ", "Connection Closed".red()).bright_black()
+        );
+        println!();
+    }
+}
