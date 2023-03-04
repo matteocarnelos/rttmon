@@ -8,6 +8,7 @@
 ## Features
 
 - Print RTT messages with (host) timestamps
+- Log RTT messages to file
 - Automatic reconnection upon OpenOCD server restart
 
 ## Installation
@@ -20,12 +21,15 @@ cargo install rttmon
 
 ```
 rttmon [HOST] [PORT]
+
+Alternatively: rttmon [HOST] [PORT] [FILE]
 ```
 
 #### Arguments
 
 - `[HOST]`: The OpenOCD server host [defualt: `localhost`]
 - `[PORT]`: The OpenOCD server port [default: `9090`]
+- `[FILE]`: Target file for loggine RTT [default: ``]
 
 For more usage info, run `rttmon --help`.
 

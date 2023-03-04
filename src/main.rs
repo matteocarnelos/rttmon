@@ -27,14 +27,14 @@ struct Args {
     file: String,
 }
 
-
-/// Format data string to have Local.now timestamp
+/// Format data string
 fn format_data(data:String) -> std::string::String {
     let now = Local::now().format("%T%.3f");
     let formatted_string = format!("{} {}", format!("[{}]", now).bright_black(), data);
     return formatted_string;
 }
 
+/// Append to file (creates file if it does not exist)
 fn append_file(path: String, data:String) {
     let mut file = OpenOptions::new()
         .create(true)
