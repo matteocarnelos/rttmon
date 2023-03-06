@@ -1,5 +1,5 @@
 use std::fs::OpenOptions;
-use std::io::prelude::*;
+use std::io::Write;
 use std::io::{BufRead, BufReader, ErrorKind};
 use std::net::TcpStream;
 use std::process::exit;
@@ -13,6 +13,7 @@ use colored::Colorize;
 /// A simple RTT monitor for OpenOCD
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
+
 struct Args {
     /// The OpenOCD RTT server host
     #[arg(default_value = "localhost")]
@@ -22,35 +23,41 @@ struct Args {
     #[arg(default_value_t = 9090)]
     port: u16,
 
-    /// Dump target for OpenOCD RTT data
-    #[arg(default_value = "")]
-    file: String,
-}
-
-/// Format data string
-fn format_data(data:String) -> std::string::String {
-    let now = Local::now().format("%T%.3f");
-    let formatted_string = format!("{} {}", format!("[{}]", now).bright_black(), data);
-    return formatted_string;
-}
-
-/// Append to file (creates file if it does not exist)
-fn append_file(path: String, data:String) {
-    let mut file = OpenOptions::new()
-        .create(true)
-        .append(true) // append(true) implies write(true)
-        .open(path)
-        .unwrap();
-
-    if let Err(e) = writeln!(file, "{}", data) {
-        eprintln!("Couldn't write to file: {}", e);
-    }
+    /// Write RTT messages to file
+    #[arg(short, long)]
+    output: Option<String>,
 }
 
 fn main() {
     let args = Args::parse();
     let address = format!("{}:{}", args.host, args.port);
+    let output = args.output;
     let mut waiting = false;
+
+    let should_write;
+    let file_writer;
+
+    match output {
+        Some(output) => {
+            file_writer = OpenOptions::new()
+                .create(true)
+                .append(true) // append(true) implies write(true)
+                .open(output);
+
+            match file_writer {
+                Ok(_) => {
+                    should_write = true;
+                }
+                Err(e) => {
+                    eprintln!("{} {}", "error:".bright_red().bold(), e);
+                    should_write = false;
+                }
+            };
+        }
+        None => {
+            should_write = false;
+        }
+    };
 
     loop {
         sleep(Duration::from_secs(1));
@@ -87,11 +94,20 @@ fn main() {
                     if c == 0 {
                         break;
                     }
-                    let formatted_line = format_data(line);
-                    if args.file.len() != 0 {
-                        append_file(args.file.clone(), formatted_line.clone());
+                    let time_now = Local::now().format("%T%.3f");
+                    if should_write {
+                        // Cannot be uninitialized as the file flag is only true if file was successfully opened, so why does it complain?
+                        match writeln!(file_writer.unwrap(), "[{}] {}", &time_now, &line) {
+                            Ok(_) => (),
+                            Err(e) => {
+                                eprintln!("{} {}", "error:".bright_red().bold(), e);
+                            }
+                        }
                     }
-                    println!("{}", formatted_line);
+                    println!(
+                        "{}",
+                        format_args!("{} {}", format!("[{}]", time_now).bright_black(), line)
+                    );
                 }
                 Err(_) => {
                     break;
