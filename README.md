@@ -20,7 +20,7 @@ cargo install rttmon
 ## Usage
 
 ```
-rttmon.exe [OPTIONS] [HOST] [PORT]
+rttmon [OPTIONS] [HOST] [PORT]
 ```
 
 #### Arguments

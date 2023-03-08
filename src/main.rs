@@ -1,4 +1,4 @@
-use std::fs::OpenOptions;
+use std::fs::{File, OpenOptions};
 use std::io::Write;
 use std::io::{BufRead, BufReader, ErrorKind};
 use std::net::TcpStream;
@@ -29,34 +29,29 @@ struct Args {
 }
 
 fn main() {
-    let args = Args::parse();
-    let address = format!("{}:{}", args.host, args.port);
-    let output = args.output;
-    let mut waiting = false;
-
-    let should_write;
-    let file_writer;
+    let args: Args = Args::parse();
+    let address: String = format!("{}:{}", args.host, args.port);
+    let output: Option<String> = args.output;
+    let mut waiting: bool = false;
+    let mut file_writer: Option<File> = None;
 
     match output {
         Some(output) => {
-            file_writer = OpenOptions::new()
+            let file = OpenOptions::new()
                 .create(true)
                 .append(true) // append(true) implies write(true)
                 .open(output);
 
-            match file_writer {
-                Ok(_) => {
-                    should_write = true;
-                }
+            file_writer = match file {
+                Ok(f) => Some(f),
                 Err(e) => {
                     eprintln!("{} {}", "error:".bright_red().bold(), e);
-                    should_write = false;
+                    return;
                 }
             };
         }
-        None => {
-            should_write = false;
-        }
+        // File not specified
+        None => (),
     };
 
     loop {
@@ -95,9 +90,8 @@ fn main() {
                         break;
                     }
                     let time_now = Local::now().format("%T%.3f");
-                    if should_write {
-                        // Cannot be uninitialized as the file flag is only true if file was successfully opened, so why does it complain?
-                        match writeln!(file_writer.unwrap(), "[{}] {}", &time_now, &line) {
+                    if file_writer.is_some() {
+                        match writeln!(file_writer.as_ref().unwrap(), "[{}] {}", &time_now, &line) {
                             Ok(_) => (),
                             Err(e) => {
                                 eprintln!("{} {}", "error:".bright_red().bold(), e);
