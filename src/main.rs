@@ -35,23 +35,19 @@ fn main() {
     let mut waiting: bool = false;
     let mut file_writer: Option<File> = None;
 
-    match output {
-        Some(output) => {
-            let file = OpenOptions::new()
-                .create(true)
-                .append(true) // append(true) implies write(true)
-                .open(output);
+    if let Some(output) = output {
+        let file = OpenOptions::new()
+            .create(true)
+            .append(true) // append(true) implies write(true)
+            .open(output);
 
-            file_writer = match file {
-                Ok(f) => Some(f),
-                Err(e) => {
-                    eprintln!("{} {}", "error:".bright_red().bold(), e);
-                    return;
-                }
-            };
-        }
-        // File not specified
-        None => (),
+        file_writer = match file {
+            Ok(f) => Some(f),
+            Err(e) => {
+                eprintln!("{} {}", "error:".bright_red().bold(), e);
+                return;
+            }
+        };
     };
 
     loop {
