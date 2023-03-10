@@ -1,4 +1,4 @@
-use std::fs::{File, OpenOptions};
+use std::fs::OpenOptions;
 use std::io::Write;
 use std::io::{BufRead, BufReader, ErrorKind};
 use std::net::TcpStream;
@@ -29,11 +29,11 @@ struct Args {
 }
 
 fn main() {
-    let args: Args = Args::parse();
-    let address: String = format!("{}:{}", args.host, args.port);
-    let output: Option<String> = args.output;
-    let mut waiting: bool = false;
-    let mut file_writer: Option<File> = None;
+    let args = Args::parse();
+    let address = format!("{}:{}", args.host, args.port);
+    let output = args.output;
+    let mut waiting = false;
+    let mut file_writer = None;
 
     if let Some(output) = output {
         let file = OpenOptions::new()
@@ -45,7 +45,7 @@ fn main() {
             Ok(f) => Some(f),
             Err(e) => {
                 eprintln!("{} {}", "error:".bright_red().bold(), e);
-                return;
+                exit(1);
             }
         };
     };
@@ -91,6 +91,7 @@ fn main() {
                             Ok(_) => (),
                             Err(e) => {
                                 eprintln!("{} {}", "error:".bright_red().bold(), e);
+                                exit(1);
                             }
                         }
                     }
