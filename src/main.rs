@@ -1,6 +1,5 @@
 use std::fs::OpenOptions;
-use std::io::Write;
-use std::io::{BufRead, BufReader, ErrorKind};
+use std::io::{BufRead, BufReader, ErrorKind, Write};
 use std::net::TcpStream;
 use std::process::exit;
 use std::thread::sleep;
@@ -24,24 +23,19 @@ struct Args {
     port: u16,
 
     /// Write RTT messages to file
-    #[arg(short, long)]
-    output: Option<String>,
+    #[arg(short = 'o', long = "output")]
+    path: Option<String>,
 }
 
 fn main() {
     let args = Args::parse();
     let address = format!("{}:{}", args.host, args.port);
-    let output = args.output;
+    let output = args.path;
     let mut waiting = false;
-    let mut file_writer = None;
+    let mut file = None;
 
     if let Some(output) = output {
-        let file = OpenOptions::new()
-            .create(true)
-            .append(true) // append(true) implies write(true)
-            .open(output);
-
-        file_writer = match file {
+        file = match OpenOptions::new().create(true).append(true).open(output) {
             Ok(f) => Some(f),
             Err(e) => {
                 eprintln!("{} {}", "error:".bright_red().bold(), e);
@@ -86,8 +80,8 @@ fn main() {
                         break;
                     }
                     let time_now = Local::now().format("%T%.3f");
-                    if file_writer.is_some() {
-                        match writeln!(file_writer.as_ref().unwrap(), "[{}] {}", &time_now, &line) {
+                    if let Some(file) = &mut file {
+                        match writeln!(file, "[{}] {}", &time_now, &line) {
                             Ok(_) => (),
                             Err(e) => {
                                 eprintln!("{} {}", "error:".bright_red().bold(), e);

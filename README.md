@@ -30,7 +30,7 @@ rttmon [OPTIONS] [HOST] [PORT]
 
 #### Options
 
-- `-o`, `--output` <OUTPUT>  Write RTT messages to file
+- `-o`, `--output` <PATH>:  Write RTT messages to file
 
 For more usage info, run `rttmon --help`.
 
