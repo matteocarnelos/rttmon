@@ -1,4 +1,5 @@
-use std::io::{BufRead, BufReader, ErrorKind};
+use std::fs::OpenOptions;
+use std::io::{BufRead, BufReader, ErrorKind, Write};
 use std::net::TcpStream;
 use std::process::exit;
 use std::thread::sleep;
@@ -11,6 +12,7 @@ use colored::Colorize;
 /// A simple RTT monitor for OpenOCD
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
+
 struct Args {
     /// The OpenOCD RTT server host
     #[arg(default_value = "localhost")]
@@ -19,12 +21,29 @@ struct Args {
     /// The OpenOCD RTT server port
     #[arg(default_value_t = 9090)]
     port: u16,
+
+    /// Write RTT messages to file
+    #[arg(short = 'o', long = "output")]
+    path: Option<String>,
 }
 
 fn main() {
     let args = Args::parse();
     let address = format!("{}:{}", args.host, args.port);
+    let path = args.path;
     let mut waiting = false;
+    let mut file = None;
+
+    if let Some(path) = path {
+        file = match OpenOptions::new().create(true).append(true).open(path) {
+            Ok(f) => Some(f),
+            Err(e) => {
+                eprintln!("{} {}", "error:".bright_red().bold(), e);
+                exit(1);
+            }
+        };
+    };
+
     loop {
         sleep(Duration::from_secs(1));
         let stream = TcpStream::connect(&address);
@@ -60,8 +79,20 @@ fn main() {
                     if c == 0 {
                         break;
                     }
-                    let now = Local::now().format("%T%.3f");
-                    print!("{} {}", format!("[{}]", now).bright_black(), line);
+                    let time_now = Local::now().format("%T%.3f");
+                    if let Some(file) = &mut file {
+                        match writeln!(file, "[{}] {}", &time_now, &line) {
+                            Ok(_) => (),
+                            Err(e) => {
+                                eprintln!("{} {}", "error:".bright_red().bold(), e);
+                                exit(1);
+                            }
+                        }
+                    }
+                    println!(
+                        "{}",
+                        format_args!("{} {}", format!("[{}]", time_now).bright_black(), line)
+                    );
                 }
                 Err(_) => {
                     break;
