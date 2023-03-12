@@ -30,12 +30,12 @@ struct Args {
 fn main() {
     let args = Args::parse();
     let address = format!("{}:{}", args.host, args.port);
-    let output = args.path;
+    let path = args.path;
     let mut waiting = false;
     let mut file = None;
 
-    if let Some(output) = output {
-        file = match OpenOptions::new().create(true).append(true).open(output) {
+    if let Some(path) = path {
+        file = match OpenOptions::new().create(true).append(true).open(path) {
             Ok(f) => Some(f),
             Err(e) => {
                 eprintln!("{} {}", "error:".bright_red().bold(), e);
