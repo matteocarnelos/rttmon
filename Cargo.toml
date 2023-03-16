@@ -13,3 +13,4 @@ edition = "2021"
 clap = { version = "4.1", features = ["derive"] }
 chrono = "0.4"
 colored = "2.0"
+anyhow = "1.0"

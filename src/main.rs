@@ -5,6 +5,7 @@ use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
 
+use anyhow::Error;
 use chrono::Local;
 use clap::Parser;
 use colored::Colorize;
@@ -28,26 +29,26 @@ struct Args {
 }
 
 fn main() {
+    if let Err(e) = rttmon() {
+        eprintln!("{} {}", "error:".bright_red().bold(), e);
+        exit(1);
+    }
+}
+
+fn rttmon() -> Result<(), Error> {
     let args = Args::parse();
     let address = format!("{}:{}", args.host, args.port);
     let path = args.path;
     let mut waiting = false;
-    let mut file = None;
-
-    if let Some(path) = path {
-        file = match OpenOptions::new().create(true).append(true).open(path) {
-            Ok(f) => Some(f),
-            Err(e) => {
-                eprintln!("{} {}", "error:".bright_red().bold(), e);
-                exit(1);
-            }
-        };
+    let mut file = if let Some(p) = path {
+        Some(OpenOptions::new().create(true).write(true).open(p)?)
+    } else {
+        None
     };
 
     loop {
         sleep(Duration::from_secs(1));
-        let stream = TcpStream::connect(&address);
-        let stream = match stream {
+        let stream = match TcpStream::connect(&address) {
             Ok(s) => s,
             Err(e) => {
                 if e.kind() == ErrorKind::ConnectionRefused {
@@ -60,10 +61,8 @@ fn main() {
                         waiting = true;
                     }
                     continue;
-                } else {
-                    eprintln!("{} {}", "error:".bright_red().bold(), e);
-                    exit(1);
                 }
+                return Err(e.into());
             }
         };
         println!(
@@ -79,19 +78,13 @@ fn main() {
                     if c == 0 {
                         break;
                     }
-                    let time_now = Local::now().format("%T%.3f");
-                    if let Some(file) = &mut file {
-                        match writeln!(file, "[{}] {}", &time_now, &line) {
-                            Ok(_) => (),
-                            Err(e) => {
-                                eprintln!("{} {}", "error:".bright_red().bold(), e);
-                                exit(1);
-                            }
-                        }
+                    let now = Local::now().format("%T%.3f");
+                    if let Some(f) = &mut file {
+                        writeln!(f, "[{}] {}", now, line)?;
                     }
                     println!(
                         "{}",
-                        format_args!("{} {}", format!("[{}]", time_now).bright_black(), line)
+                        format_args!("{} {}", format!("[{}]", now).bright_black(), line)
                     );
                 }
                 Err(_) => {
