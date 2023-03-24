@@ -80,9 +80,9 @@ fn rttmon() -> Result<(), Error> {
                     }
                     let now = Local::now().format("%T%.3f");
                     if let Some(f) = &mut file {
-                        writeln!(f, "[{}] {}", now, line)?;
+                        write!(f, "[{}] {}", now, line)?;
                     }
-                    println!(
+                    print!(
                         "{}",
                         format_args!("{} {}", format!("[{}]", now).bright_black(), line)
                     );
