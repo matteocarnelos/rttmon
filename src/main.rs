@@ -1,6 +1,7 @@
 use std::fs::OpenOptions;
 use std::io::{BufRead, BufReader, ErrorKind, Write};
 use std::net::TcpStream;
+use std::path::PathBuf;
 use std::process::exit;
 use std::thread::sleep;
 use std::time::Duration;
@@ -25,7 +26,7 @@ struct Args {
 
     /// Write RTT messages to file
     #[arg(short = 'o', long = "output")]
-    path: Option<String>,
+    path: Option<PathBuf>,
 }
 
 fn main() {
