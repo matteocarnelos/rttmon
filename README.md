@@ -20,19 +20,17 @@ cargo install rttmon
 ## Usage
 
 ```
-rttmon [OPTIONS] [HOST] [PORT]
+Usage: rttmon [OPTIONS] [HOST] [PORT]
+
+Arguments:
+  [HOST]  The OpenOCD RTT server host [default: localhost]
+  [PORT]  The OpenOCD RTT server port [default: 9090]
+
+Options:
+  -o, --output <PATH>  Write RTT messages to file
+  -h, --help           Print help
+  -V, --version        Print version
 ```
-
-#### Arguments
-
-- `[HOST]`: The OpenOCD server host [defualt: `localhost`]
-- `[PORT]`: The OpenOCD server port [default: `9090`]
-
-#### Options
-
-- `-o`, `--output` `<PATH>`: Write RTT messages to file
-
-For more usage info, run `rttmon --help`.
 
 #### Additional resources
 
